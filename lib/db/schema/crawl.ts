@@ -2,15 +2,15 @@ import { sql } from "drizzle-orm";
 import { text, varchar, timestamp, pgTable } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-
 import { nanoid } from "@/lib/utils";
 
-export const resources = pgTable("resources", {
+export const crawls = pgTable("crawls", {
   id: varchar("id", { length: 191 })
     .primaryKey()
     .$defaultFn(() => nanoid()),
-  content: text("content").notNull(),
-
+  url: text("url").notNull(),
+  status: text("status").notNull().default("pending"),
+  firecrawlId: text("firecrawl_id").notNull(),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -19,8 +19,7 @@ export const resources = pgTable("resources", {
     .default(sql`now()`),
 });
 
-// Schema for resources - used to validate API requests
-export const insertResourceSchema = createSelectSchema(resources)
+export const insertCrawlSchema = createSelectSchema(crawls)
   .extend({})
   .omit({
     id: true,
@@ -28,5 +27,4 @@ export const insertResourceSchema = createSelectSchema(resources)
     updatedAt: true,
   });
 
-// Type for resources - used to type API request params and within Components
-export type NewResourceParams = z.infer<typeof insertResourceSchema>;
+export type NewCrawlParams = z.infer<typeof insertCrawlSchema>; 
